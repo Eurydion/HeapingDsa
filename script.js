@@ -1,6 +1,6 @@
-//Version Number 2
+//VERSION 3//
 //=============================================================================
-// GLOBAL CONFIGURATION & STATES
+// GLOBAL CONFIGURATION & STATE
 // Handles canvas references, animation settings, and current application state.
 //=============================================================================
 const ANIMATION_DELAY = 500; 
@@ -31,6 +31,19 @@ const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const parent = (index) => Math.floor(index / 2);
 const left_child = (index) => 2 * index;
 const right_child = (index) => 2 * index + 1;
+
+// NEW: Function to ensure all inserted values are treated as strings.
+// This is critical because JavaScript's string comparison (lexicographical)
+// naturally handles alphabetical order (e.g., 'Z' > 'A').
+function normalizeValue(input) {
+    const trimmed = String(input).trim();
+    if (!trimmed) return null;
+
+    // Check if the trimmed input is a valid number, and return it as a number if so.
+    // If we only deal with characters, we can skip this number-specific logic.
+    // However, to allow BOTH numbers and letters, we stick to string comparisons.
+    return trimmed; 
+}
 
 
 //=============================================================================
@@ -98,7 +111,7 @@ class BaseHeap {
     peek() { return this.heap.length > 1 ? this.heap[1] : null; }
     isEmpty() { return this.heap.length <= 1; }
 
-    // NEW: General delete logic
+    // General delete logic (remains the same, uses internal heap array)
     async deleteAtIndex(index) {
         const size = this.heap.length - 1;
         if (index < 1 || index > size) {
@@ -146,6 +159,8 @@ class MaxHeap extends BaseHeap {
         await sleep(ANIMATION_DELAY);
         unhighlightNode(index);
 
+        // Comparison uses '>' operator, which works for both numbers and strings 
+        // (lexicographical comparison, where 'Z' > 'A')
         while (index > 1) {
             const parentIndex = parent(index);
             if (this.heap[parentIndex] < this.heap[index]) {
@@ -163,6 +178,7 @@ class MaxHeap extends BaseHeap {
         const right = right_child(index);
         const n = this.heap.length;
 
+        // Comparison remains the same: '>' works for numbers and strings
         if (left < n && this.heap[left] > this.heap[largest]) largest = left;
         if (right < n && this.heap[right] > this.heap[largest]) largest = right;
 
@@ -194,14 +210,13 @@ class MaxHeap extends BaseHeap {
         return maxValue;
     }
     
-    // NEW: Restore Heap Property after replacing a node
+    // Restore Heap Property (Comparison remains the same)
     async restoreHeap(index) {
         let currentIndex = index;
         const parentIndex = parent(currentIndex);
         
         // Check if the node needs to sift UP
         if (currentIndex > 1 && this.heap[parentIndex] < this.heap[currentIndex]) {
-            // Use the insert's sift-up logic
             while (currentIndex > 1) {
                 const pIndex = parent(currentIndex);
                 if (this.heap[pIndex] < this.heap[currentIndex]) {
@@ -231,6 +246,8 @@ class MinHeap extends BaseHeap {
         await sleep(ANIMATION_DELAY);
         unhighlightNode(index);
 
+        // Comparison uses '<' operator, which works for both numbers and strings 
+        // (lexicographical comparison, where 'A' < 'Z')
         while (index > 1) {
             const parentIndex = parent(index);
             if (this.heap[parentIndex] > this.heap[index]) {
@@ -248,6 +265,7 @@ class MinHeap extends BaseHeap {
         const right = right_child(index);
         const n = this.heap.length;
 
+        // Comparison remains the same: '<' works for numbers and strings
         if (left < n && this.heap[left] < this.heap[smallest]) smallest = left;
         if (right < n && this.heap[right] < this.heap[smallest]) smallest = right;
 
@@ -278,14 +296,13 @@ class MinHeap extends BaseHeap {
         return minValue;
     }
 
-    // NEW: Restore Heap Property after replacing a node
+    // Restore Heap Property (Comparison remains the same)
     async restoreHeap(index) {
         let currentIndex = index;
         const parentIndex = parent(currentIndex);
         
         // Check if the node needs to sift UP
         if (currentIndex > 1 && this.heap[parentIndex] > this.heap[currentIndex]) {
-            // Use the insert's sift-up logic
             while (currentIndex > 1) {
                 const pIndex = parent(currentIndex);
                 if (this.heap[pIndex] > this.heap[currentIndex]) {
@@ -468,12 +485,19 @@ function updateVisualization(recalculatePositions = true) {
 async function insertElement() {
     if (isAnimating) return showMessage("Wait for animation...", true);
     const input = document.getElementById('insertValue');
-    let value = parseInt(input.value);
-    if (isNaN(value) || value < 0 || value > 999) return showMessage("Invalid Number", true);
+    
+    // Use the new normalization function
+    const value = normalizeValue(input.value); 
+    
+    if (value === null) return showMessage("Input value cannot be empty.", true);
+    
+    // Optional: Limit string length for node display
+    if (value.length > 5) return showMessage("Value too long. Max 5 characters.", true);
     
     await currentHeap.insert(value);
     showMessage(`Inserted ${value}`);
-    input.value = Math.floor(Math.random() * 100) + 1;
+    // No need to set a random number, just clear or reset to default
+    input.value = ''; 
     document.getElementById('insertBtnText').textContent = 'Insert';
 }
 
@@ -511,8 +535,11 @@ async function deleteAtIndexHandler() {
 async function loadArrayHandler() {
     if (isAnimating) return showMessage("Wait for animation...", true);
     const arrayInput = document.getElementById('loadArray').value;
-    const values = arrayInput.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
-    if (values.length === 0) return showMessage("Invalid Array", true);
+    
+    // CHANGE: Use normalizeValue and filter out nulls/empties
+    const values = arrayInput.split(',').map(normalizeValue).filter(v => v !== null); 
+    
+    if (values.length === 0) return showMessage("Invalid Array. Enter comma-separated values.", true);
 
     isAnimating = true;
     const newHeap = currentHeapType === 'MaxHeap' ? new MaxHeap() : new MinHeap();
@@ -571,8 +598,8 @@ window.onload = function() {
     // Listeners
     document.getElementById('heapType').addEventListener('change', handleTypeChange);
     
-    // Set initial Insert Value Randomly
-    document.getElementById('insertValue').value = Math.floor(Math.random() * 100) + 1;
+    // Set initial Insert Value 
+    document.getElementById('insertValue').value = 'Z';
     document.getElementById('insertBtnText').textContent = 'Insert';
     
     // Initial Load

@@ -38,16 +38,16 @@
                 <label for="heapType" class="block text-sm font-medium text-gray-700">Current Heap Type</label>
                 <select id="heapType"
                     class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm">
-                    <option value="MaxHeap">Max Heap (Largest at Root)</option>
-                    <option value="MinHeap">Min Heap (Smallest at Root)</option>
+                    <option value="MaxHeap">Max Heap (Z-A Priority)</option>
+                    <option value="MinHeap">Min Heap (A-Z Priority)</option>
                 </select>
             </div>
 
             <div class="col-span-1">
-                <label for="insertValue" class="block text-sm font-medium text-gray-700">Insert Value (0-999)</label>
-                <input type="number" id="insertValue" placeholder="e.g., 42" min="0" max="999"
+                <label for="insertValue" class="block text-sm font-medium text-gray-700">Insert Value (Text/Num)</label>
+                <input type="text" id="insertValue" placeholder="e.g., A, Z, or 10" 
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2"
-                    value="10">
+                    value="A">
                 <button onclick="insertElement()"
                     class="mt-2 w-full bg-indigo-600 text-white p-2 rounded-md font-medium hover:bg-indigo-700 transition duration-150">
                     <span id="insertBtnText">Insert</span>
@@ -77,9 +77,9 @@
             <div class="col-span-1">
                 <label for="loadArray" class="block text-sm font-medium text-gray-700">Load Array
                     (Comma-separated)</label>
-                <input type="text" id="loadArray" placeholder="e.g., 5, 20, 15, 3"
+                <input type="text" id="loadArray" placeholder="e.g., A, Z, B"
                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2"
-                    value="30, 15, 25, 5, 12">
+                    value="E, C, D, A, B">
                 <button onclick="loadArrayHandler()"
                     class="mt-2 w-full bg-gray-500 text-white p-2 rounded-md font-medium hover:bg-gray-600 transition duration-150">
                     Load & Build Heap
