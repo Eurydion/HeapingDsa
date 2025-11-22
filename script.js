@@ -479,3 +479,73 @@ window.onload = function() {
 window.addEventListener('resize', () => {
     if (!isAnimating) updateVisualization(true);
 });
+
+//=============================================================================
+// MOUSE CURSOR TRAILING EFFECT
+// (WITH DANGLING PHYSICS)
+//=============================================================================
+
+const cattoCursor = document.getElementById('catto-cursor');
+let currentX = 0;
+let currentY = 0;
+let targetX = 0;
+let targetY = 0;
+const sensitivity = 0.1; // Controls the "lag" or "swing" smoothness
+const MAX_ROTATION = 30; // Maximum rotation angle in degrees (adjust for effect)
+
+// Variables to store the previous position for velocity calculation
+let previousX = 0;
+let previousY = 0;
+
+
+// 1. Update the target position whenever the mouse moves
+document.addEventListener('mousemove', (e) => {
+    // Offset is now 50px based on your configuration (assuming catto.png is 100x100)
+    targetX = e.clientX - 50; 
+    targetY = e.clientY - 50; 
+});
+
+// 2. Animate the cat cursor to catch up to the target position
+function animateCursor() {
+    // --- POSITION CATCH-UP LOGIC (Trailing) ---
+    const dx = targetX - currentX;
+    const dy = targetY - currentY;
+    
+    currentX += dx * sensitivity;
+    currentY += dy * sensitivity;
+
+    // --- ROTATION/SWING LOGIC (Dangling) ---
+    
+    // Calculate instantaneous velocity (change in position since last frame)
+    const velocityX = currentX - previousX;
+    const velocityY = currentY - previousY;
+    
+    // The main rotation angle is based on horizontal movement (velocityX).
+    // The rotation should be capped (MAX_ROTATION) and scaled by a small factor 
+    // to prevent excessive spinning.
+    const rotationZ = velocityX * 10; // Rotate Z-axis (plane of the screen)
+    
+    // Optional: Add a subtle 3D tilt based on vertical movement (velocityY)
+    // This makes it feel more anchored, like a keychain swinging forward/back.
+    const rotationX = velocityY * 10; 
+    
+    // Apply bounds for rotation (preventing wild spinning)
+    const clampedRotationZ = Math.min(Math.max(rotationZ, -MAX_ROTATION), MAX_ROTATION);
+    const clampedRotationX = Math.min(Math.max(rotationX, -MAX_ROTATION / 2), MAX_ROTATION / 2);
+
+    // Apply the position and rotation using CSS transform
+    cattoCursor.style.transform = 
+        `translate(${currentX}px, ${currentY}px) 
+         rotateZ(${clampedRotationZ}deg) 
+         rotateX(${clampedRotationX}deg)`;
+         
+    // Update previous positions for the next velocity calculation
+    previousX = currentX;
+    previousY = currentY;
+
+    // Request the next frame for smooth animation
+    requestAnimationFrame(animateCursor);
+}
+
+// Start the animation loop
+animateCursor();

@@ -1,10 +1,34 @@
 body {
     font-family: 'Inter', sans-serif;
     background-color: #f3f4f6;
+
 }
 
 .container-shadow {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* --- THE CUSTOM CURSOR ELEMENT --- */
+#catto-cursor {
+    /* Your image file */
+    background-image: url('cat.png');
+    
+    /* Image sizing */
+    width: 60px; /* Adjust size as needed */
+    height: 60px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    
+    /* Positioning & Visibility */
+    position: fixed; /* Keep it relative to the viewport */
+    pointer-events: none; /* Crucial: Allows clicking elements *under* the cursor */
+    z-index: 9999; /* Ensure it's on top of everything */
+    
+    /* ANIMATION: This is what makes it *smoothly follow* the cursor */
+    transition: transform 0.1s ease-out; /* Small delay for "trailing" */
+    
+    /* Adjust origin for aesthetic center/swing */
+
 }
 
 /* SCROLL CONTAINER STYLE */
