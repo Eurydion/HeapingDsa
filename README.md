@@ -1,4 +1,4 @@
-# 🏗️ The Heap Builder
+# 🏗️ Baduday's Heap Visualization
 
 **The Heap Builder** is an interactive, web-based visualization tool for learning Data Structures. It demonstrates exactly how **Max Heaps** and **Min Heaps** work by animating the construction, insertion, and extraction processes in real-time.
 
