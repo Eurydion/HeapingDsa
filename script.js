@@ -1,5 +1,5 @@
 //=============================================================================
-// GLOBAL CONFIGURATION & STATE
+// GLOBAL CONFIGURATION & STATES
 // Handles canvas references, animation settings, and current application state.
 //=============================================================================
 const ANIMATION_DELAY = 500; 
