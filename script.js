@@ -602,8 +602,7 @@ let previousY = 0;
 
 // 1. Update the target position whenever the mouse moves
 document.addEventListener('mousemove', (e) => {
-    // Offset is 50px (half of the assumed 100x100 effective size from earlier discussions, 
-    // though CSS uses 60x60, 50 is a good center point offset)
+    // Offset is now 50px based on your configuration (assuming catto.png is 100x100)
     targetX = e.clientX - 50; 
     targetY = e.clientY - 50; 
 });
@@ -623,8 +622,13 @@ function animateCursor() {
     const velocityX = currentX - previousX;
     const velocityY = currentY - previousY;
     
-    // Rotation based on movement
-    const rotationZ = velocityX * 10; 
+    // The main rotation angle is based on horizontal movement (velocityX).
+    // The rotation should be capped (MAX_ROTATION) and scaled by a small factor 
+    // to prevent excessive spinning.
+    const rotationZ = velocityX * 10; // Rotate Z-axis (plane of the screen)
+    
+    // Optional: Add a subtle 3D tilt based on vertical movement (velocityY)
+    // This makes it feel more anchored, like a keychain swinging forward/back.
     const rotationX = velocityY * 10; 
     
     // Apply bounds for rotation (preventing wild spinning)

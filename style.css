@@ -7,11 +7,10 @@ body {
 .container-shadow {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
-
 /* --- THE CUSTOM CURSOR ELEMENT --- */
 #catto-cursor {
     /* Your image file */
-    background-image: url('catto.png');
+    background-image: url('cat.png');
     
     /* Image sizing */
     width: 60px; /* Adjust size as needed */
@@ -28,6 +27,7 @@ body {
     transition: transform 0.1s ease-out; /* Small delay for "trailing" */
     
     /* Adjust origin for aesthetic center/swing */
+
 }
 
 /* SCROLL CONTAINER STYLE */
