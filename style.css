@@ -11,7 +11,7 @@ body {
 /* --- THE CUSTOM CURSOR ELEMENT --- */
 #catto-cursor {
     /* Your image file */
-    background-image: url('cat.png');
+    background-image: url('catto.png');
     
     /* Image sizing */
     width: 60px; /* Adjust size as needed */
@@ -28,7 +28,6 @@ body {
     transition: transform 0.1s ease-out; /* Small delay for "trailing" */
     
     /* Adjust origin for aesthetic center/swing */
-
 }
 
 /* SCROLL CONTAINER STYLE */

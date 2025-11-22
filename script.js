@@ -96,6 +96,38 @@ class BaseHeap {
 
     peek() { return this.heap.length > 1 ? this.heap[1] : null; }
     isEmpty() { return this.heap.length <= 1; }
+
+    // NEW: General delete logic
+    async deleteAtIndex(index) {
+        const size = this.heap.length - 1;
+        if (index < 1 || index > size) {
+            return { success: false, value: null };
+        }
+
+        isAnimating = true;
+        const deletedValue = this.heap[index]; 
+
+        // Special Case: Deleting the last element is easy
+        if (index === size) {
+            this.heap.pop();
+            isAnimating = false;
+            updateVisualization(true);
+            return { success: true, value: deletedValue };
+        }
+        
+        // 1. Swap the element to be deleted with the last element
+        await this.swap(index, size); 
+        
+        // 2. Remove the element from the end of the array
+        this.heap.pop(); 
+        
+        // 3. Restore the Heap property (logic handled by derived classes)
+        await this.restoreHeap(index);
+
+        isAnimating = false;
+        updateVisualization(true);
+        return { success: true, value: deletedValue };
+    }
 }
 
 //=============================================================================
@@ -160,6 +192,27 @@ class MaxHeap extends BaseHeap {
         updateVisualization(true);
         return maxValue;
     }
+    
+    // NEW: Restore Heap Property after replacing a node
+    async restoreHeap(index) {
+        let currentIndex = index;
+        const parentIndex = parent(currentIndex);
+        
+        // Check if the node needs to sift UP
+        if (currentIndex > 1 && this.heap[parentIndex] < this.heap[currentIndex]) {
+            // Use the insert's sift-up logic
+            while (currentIndex > 1) {
+                const pIndex = parent(currentIndex);
+                if (this.heap[pIndex] < this.heap[currentIndex]) {
+                    await this.swap(pIndex, currentIndex); 
+                    currentIndex = pIndex;
+                } else { break; }
+            }
+        } else {
+            // Otherwise, the node needs to sift DOWN
+            await this.heapify(index);
+        }
+    }
 }
 
 //=============================================================================
@@ -222,6 +275,27 @@ class MinHeap extends BaseHeap {
         isAnimating = false;
         updateVisualization(true);
         return minValue;
+    }
+
+    // NEW: Restore Heap Property after replacing a node
+    async restoreHeap(index) {
+        let currentIndex = index;
+        const parentIndex = parent(currentIndex);
+        
+        // Check if the node needs to sift UP
+        if (currentIndex > 1 && this.heap[parentIndex] > this.heap[currentIndex]) {
+            // Use the insert's sift-up logic
+            while (currentIndex > 1) {
+                const pIndex = parent(currentIndex);
+                if (this.heap[pIndex] > this.heap[currentIndex]) {
+                    await this.swap(pIndex, currentIndex);
+                    currentIndex = pIndex;
+                } else { break; }
+            }
+        } else {
+            // Otherwise, the node needs to sift DOWN
+            await this.heapify(index);
+        }
     }
 }
 
@@ -388,6 +462,7 @@ function updateVisualization(recalculatePositions = true) {
 
 //=============================================================================
 // EVENT HANDLERS
+// Functions triggered by user interactions (Buttons and Inputs).
 //=============================================================================
 async function insertElement() {
     if (isAnimating) return showMessage("Wait for animation...", true);
@@ -398,6 +473,7 @@ async function insertElement() {
     await currentHeap.insert(value);
     showMessage(`Inserted ${value}`);
     input.value = Math.floor(Math.random() * 100) + 1;
+    document.getElementById('insertBtnText').textContent = 'Insert';
 }
 
 async function extractElement() {
@@ -405,6 +481,30 @@ async function extractElement() {
     if (currentHeap.isEmpty()) return showMessage("Heap is empty", true);
     const extracted = await currentHeap.extract();
     showMessage(`Extracted: ${extracted}`);
+}
+
+async function deleteAtIndexHandler() {
+    if (isAnimating) return showMessage("Wait for animation...", true);
+    const indexInput = document.getElementById('deleteIndex');
+    const index = parseInt(indexInput.value);
+    
+    if (isNaN(index) || index < 1) {
+        return showMessage("Invalid Index. Must be a number >= 1.", true);
+    }
+    
+    if (index >= currentHeap.heap.length) {
+        return showMessage(`Index ${index} is out of bounds. Max index is ${currentHeap.heap.length - 1}.`, true);
+    }
+
+    const result = await currentHeap.deleteAtIndex(index);
+    
+    if (result.success) {
+        showMessage(`Deleted value ${result.value} at index ${index}.`);
+    } else {
+        showMessage(`Could not delete at index ${index}.`, true);
+    }
+    
+    indexInput.value = ''; // Clear input after use
 }
 
 async function loadArrayHandler() {
@@ -471,7 +571,9 @@ window.onload = function() {
     document.getElementById('heapType').addEventListener('change', handleTypeChange);
     
     // Set initial Insert Value Randomly
-    document.getElementById('insertValue').value = Math.floor(Math.random() * 100) + 1;    
+    document.getElementById('insertValue').value = Math.floor(Math.random() * 100) + 1;
+    document.getElementById('insertBtnText').textContent = 'Insert';
+    
     // Initial Load
     loadArrayHandler(); 
 };
@@ -500,7 +602,8 @@ let previousY = 0;
 
 // 1. Update the target position whenever the mouse moves
 document.addEventListener('mousemove', (e) => {
-    // Offset is now 50px based on your configuration (assuming catto.png is 100x100)
+    // Offset is 50px (half of the assumed 100x100 effective size from earlier discussions, 
+    // though CSS uses 60x60, 50 is a good center point offset)
     targetX = e.clientX - 50; 
     targetY = e.clientY - 50; 
 });
@@ -520,13 +623,8 @@ function animateCursor() {
     const velocityX = currentX - previousX;
     const velocityY = currentY - previousY;
     
-    // The main rotation angle is based on horizontal movement (velocityX).
-    // The rotation should be capped (MAX_ROTATION) and scaled by a small factor 
-    // to prevent excessive spinning.
-    const rotationZ = velocityX * 10; // Rotate Z-axis (plane of the screen)
-    
-    // Optional: Add a subtle 3D tilt based on vertical movement (velocityY)
-    // This makes it feel more anchored, like a keychain swinging forward/back.
+    // Rotation based on movement
+    const rotationZ = velocityX * 10; 
     const rotationX = velocityY * 10; 
     
     // Apply bounds for rotation (preventing wild spinning)
