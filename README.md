@@ -2,8 +2,7 @@
 
 **The Heap Builder** is an interactive, web-based visualization tool for learning Data Structures. It demonstrates exactly how **Max Heaps** and **Min Heaps** work by animating the construction, insertion, and extraction processes in real-time.
 
-![Heap Visualization]([https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Max-Heap.svg/1200px-Max-Heap.svg.png](https://ibb.co/KcNPD0Sn))
-*(Note: This is a placeholder image of a Max Heap structure)*
+![Heap Visualization](https://ibb.co/SXqgfxDp)
 
 ## 🌟 Features
 
