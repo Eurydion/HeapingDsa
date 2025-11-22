@@ -1,3 +1,4 @@
+//Version Number 2
 //=============================================================================
 // GLOBAL CONFIGURATION & STATES
 // Handles canvas references, animation settings, and current application state.
