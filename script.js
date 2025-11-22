@@ -1,4 +1,7 @@
-// --- GLOBAL CONFIGURATION ---
+//=============================================================================
+// GLOBAL CONFIGURATION & STATE
+// Handles canvas references, animation settings, and current application state.
+//=============================================================================
 const ANIMATION_DELAY = 500; 
 let isAnimating = false;
 
@@ -19,15 +22,21 @@ let currentHeap = null; // Initialized in window.onload
 let positions = []; 
 
 
-// --- HELPERS ---
+//=============================================================================
+// HELPER UTILITIES
+// Mathematical formulas for tree indexing (1-based) and async sleep function.
+//=============================================================================
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const parent = (index) => Math.floor(index / 2);
 const left_child = (index) => 2 * index;
 const right_child = (index) => 2 * index + 1;
 
 
-// --- 1. HEAP CLASSES ---
-
+//=============================================================================
+// BASE HEAP CLASS
+// Contains shared logic, primarily the complex 'swap' method which handles 
+// both data swapping and the CSS-based physical movement animation.
+//=============================================================================
 class BaseHeap {
     constructor() {
         this.heap = [null]; // Array used for 1-based indexing
@@ -89,6 +98,10 @@ class BaseHeap {
     isEmpty() { return this.heap.length <= 1; }
 }
 
+//=============================================================================
+// MAX HEAP IMPLEMENTATION
+// Logic ensuring the parent node is always GREATER than its children.
+//=============================================================================
 class MaxHeap extends BaseHeap {
     async insert(value) {
         isAnimating = true;
@@ -139,7 +152,6 @@ class MaxHeap extends BaseHeap {
         } else {
             this.heap[1] = this.heap.pop();
             // No animation for the replacement, we just rebuild and heapify down
-            // (Ideally we'd animate the last node moving to root, but simpler to just re-render then sink)
             updateVisualization(true); 
             await this.heapify(1);
         }
@@ -150,6 +162,10 @@ class MaxHeap extends BaseHeap {
     }
 }
 
+//=============================================================================
+// MIN HEAP IMPLEMENTATION
+// Logic ensuring the parent node is always SMALLER than its children.
+//=============================================================================
 class MinHeap extends BaseHeap {
     async insert(value) {
         isAnimating = true;
@@ -210,8 +226,10 @@ class MinHeap extends BaseHeap {
 }
 
 
-// --- 2. UI & VISUALIZATION LOGIC ---
-
+//=============================================================================
+// UI HELPERS
+// Small utilities for displaying toast messages and highlighting nodes.
+//=============================================================================
 function showMessage(text, isError = false) {
     const box = document.getElementById('messageBox');
     box.textContent = text;
@@ -236,6 +254,10 @@ function unhighlightNode(index) {
     nodeDiv.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)'; 
 }
 
+//=============================================================================
+// GEOMETRY & LAYOUT CALCULATION
+// Recursively calculates X/Y coordinates for every node based on tree depth.
+//=============================================================================
 function calculateNodePositions(width) {
     positions = [null]; 
     const heapArray = currentHeap.heap;
@@ -260,6 +282,10 @@ function calculateNodePositions(width) {
     traverse_v2(1, 0, center_x, width / 4);
 }
 
+//=============================================================================
+// RENDERING & DRAWING
+// Functions to draw the connecting lines (edges) and create/update HTML nodes.
+//=============================================================================
 function drawEdges() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = '#9ca3af'; 
@@ -328,7 +354,10 @@ function renderNodes() {
     });
 }
 
-// Central Visual Update Function
+//=============================================================================
+// MAIN VISUALIZATION CONTROLLER
+// Coordinates the geometry calculation, resizing, and redrawing.
+//=============================================================================
 function updateVisualization(recalculatePositions = true) {
     updateArrayDisplay();
     
@@ -357,8 +386,10 @@ function updateVisualization(recalculatePositions = true) {
 }
 
 
-// --- 3. EVENT HANDLERS ---
-
+//=============================================================================
+// EVENT HANDLERS
+// Functions triggered by user interactions (Buttons and Inputs).
+//=============================================================================
 async function insertElement() {
     if (isAnimating) return showMessage("Wait for animation...", true);
     const input = document.getElementById('insertValue');
@@ -430,8 +461,10 @@ async function handleTypeChange() {
     showMessage(`Switched to ${currentHeapType}`);
 }
 
-// --- 4. INITIALIZATION ---
-
+//=============================================================================
+// INITIALIZATION
+// Sets up the default state and event listeners on page load.
+//=============================================================================
 window.onload = function() {
     // Initialize Default Heap
     currentHeap = new MaxHeap();
