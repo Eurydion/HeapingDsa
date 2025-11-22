@@ -24,7 +24,7 @@ Website: https://eurydion.github.io/HeapingDsa
 ## 📂 Project Structure
 
 ```text
-/HEAPINGDSA
+/heap-builder
 │
 ├── index.html      # Main structure and UI
 ├── styles.css      # Custom animations and node styling
