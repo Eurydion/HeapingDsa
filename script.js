@@ -388,7 +388,6 @@ function updateVisualization(recalculatePositions = true) {
 
 //=============================================================================
 // EVENT HANDLERS
-// Functions triggered by user interactions (Buttons and Inputs).
 //=============================================================================
 async function insertElement() {
     if (isAnimating) return showMessage("Wait for animation...", true);
@@ -399,7 +398,6 @@ async function insertElement() {
     await currentHeap.insert(value);
     showMessage(`Inserted ${value}`);
     input.value = Math.floor(Math.random() * 100) + 1;
-    document.getElementById('insertBtnText').textContent = `Insert (${input.value})`;
 }
 
 async function extractElement() {
@@ -473,9 +471,7 @@ window.onload = function() {
     document.getElementById('heapType').addEventListener('change', handleTypeChange);
     
     // Set initial Insert Value Randomly
-    document.getElementById('insertValue').value = Math.floor(Math.random() * 100) + 1;
-    document.getElementById('insertBtnText').textContent = `Insert (${document.getElementById('insertValue').value})`;
-    
+    document.getElementById('insertValue').value = Math.floor(Math.random() * 100) + 1;    
     // Initial Load
     loadArrayHandler(); 
 };
