@@ -1,4 +1,4 @@
-//VERSION 3//
+//VERSION 3.1//
 //=============================================================================
 // GLOBAL CONFIGURATION & STATE
 // Handles canvas references, animation settings, and current application state.
@@ -33,16 +33,33 @@ const left_child = (index) => 2 * index;
 const right_child = (index) => 2 * index + 1;
 
 // NEW: Function to ensure all inserted values are treated as strings.
-// This is critical because JavaScript's string comparison (lexicographical)
-// naturally handles alphabetical order (e.g., 'Z' > 'A').
 function normalizeValue(input) {
     const trimmed = String(input).trim();
     if (!trimmed) return null;
-
-    // Check if the trimmed input is a valid number, and return it as a number if so.
-    // If we only deal with characters, we can skip this number-specific logic.
-    // However, to allow BOTH numbers and letters, we stick to string comparisons.
     return trimmed; 
+}
+
+/**
+ * FIX: Custom comparison function to handle numbers stored as strings correctly.
+ * It attempts a numerical comparison first. If either value is not a pure number,
+ * it falls back to the lexicographical (string) comparison.
+ * @returns {number} 1 if a > b, -1 if a < b, 0 if a == b
+ */
+function compareValues(a, b) {
+    // 1. Attempt Numerical Comparison
+    const numA = Number(a);
+    const numB = Number(b);
+
+    if (!isNaN(numA) && !isNaN(numB)) {
+        if (numA > numB) return 1;
+        if (numA < numB) return -1;
+        return 0;
+    } 
+    
+    // 2. Fallback to Lexicographical (String) Comparison
+    if (a > b) return 1;
+    if (a < b) return -1;
+    return 0;
 }
 
 
@@ -159,11 +176,11 @@ class MaxHeap extends BaseHeap {
         await sleep(ANIMATION_DELAY);
         unhighlightNode(index);
 
-        // Comparison uses '>' operator, which works for both numbers and strings 
-        // (lexicographical comparison, where 'Z' > 'A')
         while (index > 1) {
             const parentIndex = parent(index);
-            if (this.heap[parentIndex] < this.heap[index]) {
+            // FIX: Use compareValues. MaxHeap requires parent >= child.
+            // If compareValues < 0, it means parent < child, so swap.
+            if (compareValues(this.heap[parentIndex], this.heap[index]) < 0) {
                 await this.swap(parentIndex, index); 
                 index = parentIndex;
             } else { break; }
@@ -178,9 +195,10 @@ class MaxHeap extends BaseHeap {
         const right = right_child(index);
         const n = this.heap.length;
 
-        // Comparison remains the same: '>' works for numbers and strings
-        if (left < n && this.heap[left] > this.heap[largest]) largest = left;
-        if (right < n && this.heap[right] > this.heap[largest]) largest = right;
+        // FIX: Use compareValues. largest < left means swap.
+        if (left < n && compareValues(this.heap[left], this.heap[largest]) > 0) largest = left;
+        // FIX: Use compareValues. largest < right means swap.
+        if (right < n && compareValues(this.heap[right], this.heap[largest]) > 0) largest = right;
 
         if (largest !== index) {
             await this.swap(index, largest);
@@ -215,11 +233,12 @@ class MaxHeap extends BaseHeap {
         let currentIndex = index;
         const parentIndex = parent(currentIndex);
         
-        // Check if the node needs to sift UP
-        if (currentIndex > 1 && this.heap[parentIndex] < this.heap[currentIndex]) {
+        // FIX: Check if the node needs to sift UP (parent < child)
+        if (currentIndex > 1 && compareValues(this.heap[parentIndex], this.heap[currentIndex]) < 0) {
             while (currentIndex > 1) {
                 const pIndex = parent(currentIndex);
-                if (this.heap[pIndex] < this.heap[currentIndex]) {
+                // FIX: If parent < current, swap up.
+                if (compareValues(this.heap[pIndex], this.heap[currentIndex]) < 0) {
                     await this.swap(pIndex, currentIndex); 
                     currentIndex = pIndex;
                 } else { break; }
@@ -246,11 +265,11 @@ class MinHeap extends BaseHeap {
         await sleep(ANIMATION_DELAY);
         unhighlightNode(index);
 
-        // Comparison uses '<' operator, which works for both numbers and strings 
-        // (lexicographical comparison, where 'A' < 'Z')
         while (index > 1) {
             const parentIndex = parent(index);
-            if (this.heap[parentIndex] > this.heap[index]) {
+            // FIX: Use compareValues. MinHeap requires parent <= child.
+            // If compareValues > 0, it means parent > child, so swap.
+            if (compareValues(this.heap[parentIndex], this.heap[index]) > 0) {
                 await this.swap(parentIndex, index);
                 index = parentIndex;
             } else { break; }
@@ -265,9 +284,10 @@ class MinHeap extends BaseHeap {
         const right = right_child(index);
         const n = this.heap.length;
 
-        // Comparison remains the same: '<' works for numbers and strings
-        if (left < n && this.heap[left] < this.heap[smallest]) smallest = left;
-        if (right < n && this.heap[right] < this.heap[smallest]) smallest = right;
+        // FIX: Use compareValues. smallest > left means swap.
+        if (left < n && compareValues(this.heap[left], this.heap[smallest]) < 0) smallest = left;
+        // FIX: Use compareValues. smallest > right means swap.
+        if (right < n && compareValues(this.heap[right], this.heap[smallest]) < 0) smallest = right;
 
         if (smallest !== index) {
             await this.swap(index, smallest);
@@ -301,11 +321,12 @@ class MinHeap extends BaseHeap {
         let currentIndex = index;
         const parentIndex = parent(currentIndex);
         
-        // Check if the node needs to sift UP
-        if (currentIndex > 1 && this.heap[parentIndex] > this.heap[currentIndex]) {
+        // FIX: Check if the node needs to sift UP (parent > child)
+        if (currentIndex > 1 && compareValues(this.heap[parentIndex], this.heap[currentIndex]) > 0) {
             while (currentIndex > 1) {
                 const pIndex = parent(currentIndex);
-                if (this.heap[pIndex] > this.heap[currentIndex]) {
+                // FIX: If parent > current, swap up.
+                if (compareValues(this.heap[pIndex], this.heap[currentIndex]) > 0) {
                     await this.swap(pIndex, currentIndex);
                     currentIndex = pIndex;
                 } else { break; }
